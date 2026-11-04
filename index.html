@@ -26,9 +26,9 @@
 /* La feuille commence un pas sous les pastilles et la barre d'outils, qui la recouvrent sinon */
 .letterhead-page { padding: calc(2 * var(--app-u2) + var(--app-control-size)) var(--app-u2) var(--app-u3); overflow-x: auto; }
 
-/* Les pastilles restent en haut à gauche, face à la barre d'outils, sur un fond qui masque la feuille qui défile */
+/* Les pastilles restent en haut à gauche, face à la barre d'outils, flottantes comme elle au-dessus de la feuille qui défile */
 .letterhead-pills { position: fixed; top: var(--app-u2); left: var(--app-u2); z-index: 1; display: flex; gap: var(--app-control-gap); }
-.letterhead-pills .app-pill { background: var(--app-bg); }
+.letterhead-pills .app-pill { background: var(--app-bg-floating); backdrop-filter: var(--app-blur-floating); }
 .app-pill input[type="date"] { border: none; background: transparent; color: inherit; font: inherit; text-transform: inherit; cursor: pointer; }
 
 /* Cotes reprises du gabarit InDesign : Work Sans 12 pt, grille de 14 pt, marges de 98 pt en haut et en bas, 52,64 pt sur les côtés.
