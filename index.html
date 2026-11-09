@@ -6,6 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#ffffff">
 <title>Letterhead 19h47</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500&display=swap">
@@ -337,6 +338,7 @@ function applyTheme() {
 	const theme = chosenTheme ?? (darkQuery.matches ? 'dark' : 'light');
 	document.documentElement.dataset.theme = theme;
 	document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).backgroundColor;
+	document.querySelector('link[rel="icon"]').href = theme === 'dark' ? 'favicon-dark.svg' : 'favicon.svg';
 	$('theme').textContent = theme === 'dark' ? '☀︎' : '☽︎';
 	$('theme').setAttribute('aria-pressed', String(theme === 'dark'));
 }
