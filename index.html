@@ -100,12 +100,36 @@ letterhead-grid span::after {
 	font-family: var(--app-font-ui); font-size: 7pt; color: var(--letterhead-paper-muted);
 }
 
-@page { size: A4; margin: 0; }
+/* À l'impression, les marges passent de la feuille à chaque page, et le pied de page dans les boîtes de marge du bas :
+   il se répète, calé en bas, sur chaque page. La marge du bas garde en plus la hauteur qu'il occupait dans la feuille.
+   Les boîtes de marge n'existent que dans Chrome et Edge 131+ : ailleurs, le PDF n'a pas de pied de page. */
+:root {
+	/* Dans une ligne de 14 pt, la base d'un texte descend de la moitié de (ascendante − descendante) × corps,
+	   0,3435 em pour Work Sans : la référence en 12 pt descend d'autant pour partager la base du site en 18 pt */
+	--letterhead-footer-shift: calc((18pt - 12pt) * .3435);
+}
+@page {
+	size: A4; margin: 98pt 52.64pt calc(98pt + 14pt + var(--letterhead-footer-shift));
+	@bottom-left {
+		content: "19h47.fr"; vertical-align: top;
+		font: 500 18pt/14pt var(--letterhead-font-sheet); letter-spacing: .1em; color: var(--letterhead-ink);
+	}
+	@bottom-right {
+		content: var(--letterhead-ref); vertical-align: top; padding-top: var(--letterhead-footer-shift);
+		font: 500 12pt/14pt var(--letterhead-font-sheet); color: var(--letterhead-ink);
+	}
+}
 @media print {
 	html { background: #fff; }
 	.letterhead-page { padding: 0; overflow: visible; }
-	.letterhead-pills, .add, .remove, .hours, letterhead-grid { display: none !important; }
-	.sheet { border: 0; margin: 0; }
+	.letterhead-pills, .add, .remove, .hours, letterhead-grid, footer { display: none !important; }
+	.sheet { display: block; width: auto; min-height: 0; border: 0; margin: 0; padding: 0; }
+	/* Chrome répète un tfoot en bas de chaque page, comme un thead en haut : les totaux ne viennent qu'une fois, à la fin */
+	tfoot { display: table-row-group; }
+	/* L'accent de « Quantité » en capitales dépasse de sa ligne : sur une page qui reprend l'en-tête du tableau,
+	   Chrome en imprime le haut au bas de la page d'avant. 1 pt au-dessus le garde dans la cellule, la table remonte d'autant. */
+	table { margin-top: -1pt; }
+	th { padding-top: 1pt; }
 	[contenteditable]:empty::before { content: none; }
 }
 </style>
@@ -149,7 +173,7 @@ letterhead-grid span::after {
 		</tfoot>
 	</table>
 	<p class="place"><span class="facture-only">Fait à </span><span contenteditable="plaintext-only" data-key="place" data-ph="Lieu"></span>, le <span class="long-date"></span></p>
-	<footer><span class="site">19h47.fr</span><span class="ref"><span id="kindLabel"></span> - <span id="issuerName"></span> - <span class="long-date"></span></span></footer>
+	<footer><span class="site">19h47.fr</span><span class="ref" id="ref"></span></footer>
 </article>
 </main>
 
@@ -237,14 +261,19 @@ function renderTotals() {
 	$('vatTotal').textContent = fmtEur(vat);
 	$('ttc').textContent = fmtEur(ht + vat);
 	document.querySelectorAll('.long-date').forEach(el => { el.textContent = fmtDate(state.date); });
-	$('issuerName').textContent = (state.issuer || '').split('\n')[0];
+
+	// Le pied de page de la feuille, et celui que l'impression répète sur chaque page, en chaîne CSS
+	const issuerName = (state.issuer || '').split('\n')[0];
+	const ref = [KINDS[state.kind], issuerName, fmtDate(state.date)].join(' - ');
+
+	$('ref').textContent = ref;
+	document.documentElement.style.setProperty('--letterhead-ref', JSON.stringify(ref));
 }
 
 function render() {
 	document.querySelectorAll('[data-key]').forEach(el => { el.textContent = state[el.dataset.key] ?? ''; });
 	$('sheet').dataset.kind = state.kind;
 	$('kind').value = state.kind;
-	$('kindLabel').textContent = KINDS[state.kind];
 	$('date').value = state.date;
 	renderLines();
 	renderTotals();
