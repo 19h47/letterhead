@@ -14,100 +14,7 @@
 <style>
 /* Ce que l'outil ajoute à app-style.css, la base partagée des petites apps : une feuille A4 éditable en place.
    La barre d'outils, les pastilles et les boutons disparaissent à l'impression. */
-:root {
-	/* La feuille reste du papier blanc, quel que soit le thème */
-	--letterhead-paper: rgb(255, 255, 255);
-	--letterhead-ink: rgb(26, 26, 26);
-	--letterhead-paper-muted: rgb(92, 92, 92);
-	--letterhead-paper-line: rgb(201, 196, 184);
-	--letterhead-paper-fill: color-mix(in srgb, var(--letterhead-paper-line) 20%, transparent);
-	--letterhead-font-sheet: "Work Sans", "Helvetica Neue", Arial, sans-serif;
-}
 
-/* La feuille commence un pas sous les pastilles et la barre d'outils, qui la recouvrent sinon */
-.letterhead-page { padding: calc(var(--app-toolbar-top) + var(--app-control-size) + var(--app-u2)) var(--app-u2) var(--app-u3); overflow-x: auto; }
-
-/* Les pastilles restent en haut à gauche, face à la barre d'outils, flottantes comme elle au-dessus de la feuille qui défile */
-.letterhead-pills { position: fixed; top: var(--app-toolbar-top); left: var(--app-u2); z-index: 1; display: flex; gap: var(--app-control-gap); }
-.letterhead-pills .app-pill { background: var(--app-bg); }
-.app-pill input[type="date"] { border: none; background: transparent; color: inherit; font: inherit; text-transform: inherit; cursor: pointer; }
-
-/* Cotes reprises du gabarit InDesign : Work Sans 12 pt, grille de 14 pt, marges de 98 pt en haut et en bas, 52,64 pt sur les côtés.
-   En colonne flexible, le pied de page se cale en bas de la feuille. */
-.sheet {
-	position: relative; display: flex; flex-direction: column;
-	width: 210mm; min-height: 297mm; margin: 0 auto; padding: 98pt 52.64pt;
-	background: var(--letterhead-paper); color: var(--letterhead-ink); color-scheme: light;
-	font-family: var(--letterhead-font-sheet); font-size: 12pt; line-height: 14pt;
-	border: 1px solid var(--app-line-soft);
-}
-
-[contenteditable] { outline: none; border-radius: 2px; white-space: pre-line; }
-[contenteditable]:hover, [contenteditable]:focus { background: var(--letterhead-paper-fill); }
-[contenteditable]:focus { box-shadow: 0 0 0 1px var(--letterhead-paper-line); }
-[contenteditable]:empty::before { content: attr(data-ph); color: var(--letterhead-paper-muted); }
-
-.brand, footer .site { font-size: 18pt; font-weight: 500; letter-spacing: .1em; }
-.brand { margin-bottom: 28pt; }
-.parties { display: grid; grid-template-columns: 210pt 1fr; margin-left: 84pt; }
-.parties > div::first-line { font-weight: 500; }
-h1 { max-width: 406pt; font-weight: 500; font-size: 30pt; line-height: 28pt; margin: 28pt 0 28pt 42pt; }
-
-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-col.c-desc { width: 238pt; }
-th { font-weight: 500; letter-spacing: .1em; text-transform: uppercase; text-align: right; padding: 0 0 14pt; }
-th:first-child, td:first-child { text-align: left; }
-td { vertical-align: top; text-align: right; padding: 0 0 14pt; position: relative; }
-td .detail { display: block; font-size: 10pt; }
-td .hours { display: block; font-family: var(--app-font-ui); font-size: 7pt; text-transform: uppercase; color: var(--letterhead-paper-muted); }
-tr { break-inside: avoid; }
-tbody tr .remove {
-	position: absolute; left: -12mm; top: 0; padding: 0 6px; border: 0; background: none; cursor: pointer;
-	color: var(--letterhead-paper-muted); font-family: var(--app-font-ui); font-size: 14px; line-height: 14pt;
-	opacity: 0; transition: opacity var(--app-transition-1);
-}
-tbody tr:hover .remove, .remove:focus-visible { opacity: 1; }
-.remove:hover { color: var(--letterhead-ink); }
-/* Posé dans le blanc à gauche de « Total HT », hors du flux pour ne pas décaler la grille */
-.add {
-	position: absolute; left: 0; top: 14pt; height: 14pt; padding: 0 1em;
-	border-radius: calc(infinity * 1px); border: 1px solid var(--letterhead-paper-line); background: none; cursor: pointer;
-	color: var(--letterhead-paper-muted); font-family: var(--app-font-ui); font-size: var(--app-font-small);
-	font-weight: 400; letter-spacing: 0; text-transform: uppercase; line-height: 1;
-}
-.add:hover { color: var(--letterhead-ink); }
-tfoot tr:first-child td { padding-top: 14pt; }
-tfoot td:first-child { text-align: right; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
-tfoot sup { font-size: 7pt; line-height: 0; }
-
-/* Aligné à droite sur la colonne Description, comme les libellés des totaux */
-.place { width: 238pt; text-align: right; font-size: 10pt; margin: 0 0 14pt; }
-/* Numéro et « Fait à » n'existent que sur une facture */
-.sheet:not([data-kind="facture"]) .facture-only { display: none; }
-footer { display: flex; justify-content: space-between; align-items: baseline; gap: 14pt; margin-top: auto; }
-footer .ref { font-weight: 500; }
-
-/* Grille de contrôle : 12 colonnes de 28 pt, gouttières de 14 pt, lignes de base tous les 14 pt. G pour l'afficher. */
-letterhead-grid {
-	position: absolute; inset: 0; z-index: 1; pointer-events: none;
-	background: repeating-linear-gradient(to bottom, transparent 0 calc(14pt - 1px), color-mix(in srgb, var(--letterhead-paper-line) 70%, transparent) calc(14pt - 1px) 14pt);
-}
-letterhead-grid > div { position: absolute; inset: 0 52.64pt; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 14pt; }
-letterhead-grid span { position: relative; background: color-mix(in srgb, var(--letterhead-paper-line) 15%, transparent); }
-letterhead-grid span:nth-child(even) { background: color-mix(in srgb, var(--letterhead-paper-line) 6%, transparent); }
-letterhead-grid span::after {
-	content: attr(data-index); position: absolute; inset-inline: 0; bottom: 4pt; text-align: center;
-	font-family: var(--app-font-ui); font-size: 7pt; color: var(--letterhead-paper-muted);
-}
-
-/* À l'impression, les marges passent de la feuille à chaque page, et le pied de page dans les boîtes de marge du bas :
-   il se répète, calé en bas, sur chaque page. La marge du bas garde en plus la hauteur qu'il occupait dans la feuille.
-   Les boîtes de marge n'existent que dans Chrome et Edge 131+ : ailleurs, le PDF n'a pas de pied de page. */
-:root {
-	/* Dans une ligne de 14 pt, la base d'un texte descend de la moitié de (ascendante − descendante) × corps,
-	   0,3435 em pour Work Sans : la référence en 12 pt descend d'autant pour partager la base du site en 18 pt */
-	--letterhead-footer-shift: calc((18pt - 12pt) * .3435);
-}
 @page {
 	size: A4; margin: 98pt 52.64pt calc(98pt + 14pt + var(--letterhead-footer-shift));
 	@bottom-left {
@@ -119,18 +26,115 @@ letterhead-grid span::after {
 		font: 500 12pt/14pt var(--letterhead-font-sheet); color: var(--letterhead-ink);
 	}
 }
-@media print {
-	html { background: #fff; }
-	.letterhead-page { padding: 0; overflow: visible; }
-	.letterhead-pills, .add, .remove, .hours, letterhead-grid, footer { display: none !important; }
-	.sheet { display: block; width: auto; min-height: 0; border: 0; margin: 0; padding: 0; }
-	/* Chrome répète un tfoot en bas de chaque page, comme un thead en haut : les totaux ne viennent qu'une fois, à la fin */
-	tfoot { display: table-row-group; }
-	/* L'accent de « Quantité » en capitales dépasse de sa ligne : sur une page qui reprend l'en-tête du tableau,
-	   Chrome en imprime le haut au bas de la page d'avant. 1 pt au-dessus le garde dans la cellule, la table remonte d'autant. */
-	table { margin-top: -1pt; }
-	th { padding-top: 1pt; }
-	[contenteditable]:empty::before { content: none; }
+
+@layer app {
+	:root {
+		/* La feuille reste du papier blanc, quel que soit le thème */
+		--letterhead-paper: rgb(255, 255, 255);
+		--letterhead-ink: rgb(26, 26, 26);
+		--letterhead-paper-muted: rgb(92, 92, 92);
+		--letterhead-paper-line: rgb(201, 196, 184);
+		--letterhead-paper-fill: color-mix(in srgb, var(--letterhead-paper-line) 20%, transparent);
+		--letterhead-font-sheet: "Work Sans", "Helvetica Neue", Arial, sans-serif;
+	}
+
+	/* La feuille commence un pas sous les pastilles et la barre d'outils, qui la recouvrent sinon */
+	.letterhead-page { padding: calc(var(--app-toolbar-top) + var(--app-control-size) + var(--app-u2)) var(--app-u2) var(--app-u3); overflow-x: auto; }
+
+	/* Les pastilles restent en haut à gauche, face à la barre d'outils, flottantes comme elle au-dessus de la feuille qui défile */
+	.letterhead-pills { position: fixed; top: var(--app-toolbar-top); left: var(--app-u2); z-index: 1; display: flex; gap: var(--app-control-gap); }
+	.letterhead-pills .app-pill { background: var(--app-bg); }
+	.app-pill input[type="date"] { border: none; background: transparent; color: inherit; font: inherit; text-transform: inherit; cursor: pointer; }
+
+	/* Cotes reprises du gabarit InDesign : Work Sans 12 pt, grille de 14 pt, marges de 98 pt en haut et en bas, 52,64 pt sur les côtés.
+	   En colonne flexible, le pied de page se cale en bas de la feuille. */
+	.sheet {
+		position: relative; display: flex; flex-direction: column;
+		width: 210mm; min-height: 297mm; margin: 0 auto; padding: 98pt 52.64pt;
+		background: var(--letterhead-paper); color: var(--letterhead-ink); color-scheme: light;
+		font-family: var(--letterhead-font-sheet); font-size: 12pt; line-height: 14pt;
+		border: 1px solid var(--app-line-soft);
+	}
+
+	[contenteditable] { outline: none; border-radius: 2px; white-space: pre-line; }
+	[contenteditable]:hover, [contenteditable]:focus { background: var(--letterhead-paper-fill); }
+	[contenteditable]:focus { box-shadow: 0 0 0 1px var(--letterhead-paper-line); }
+	[contenteditable]:empty::before { content: attr(data-ph); color: var(--letterhead-paper-muted); }
+
+	.brand, footer .site { font-size: 18pt; font-weight: 500; letter-spacing: .1em; }
+	.brand { margin-bottom: 28pt; }
+	.parties { display: grid; grid-template-columns: 210pt 1fr; margin-left: 84pt; }
+	.parties > div::first-line { font-weight: 500; }
+	h1 { max-width: 406pt; font-weight: 500; font-size: 30pt; line-height: 28pt; margin: 28pt 0 28pt 42pt; }
+
+	table { width: 100%; table-layout: fixed; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+	col.c-desc { width: 238pt; }
+	th { font-weight: 500; letter-spacing: .1em; text-transform: uppercase; text-align: right; padding: 0 0 14pt; }
+	th:first-child, td:first-child { text-align: left; }
+	td { vertical-align: top; text-align: right; padding: 0 0 14pt; position: relative; }
+	td .detail { display: block; font-size: 10pt; }
+	td .hours { display: block; font-family: var(--app-font-ui); font-size: 7pt; text-transform: uppercase; color: var(--letterhead-paper-muted); }
+	tr { break-inside: avoid; }
+	tbody tr .remove {
+		position: absolute; left: -12mm; top: 0; padding: 0 6px; border: 0; background: none; cursor: pointer;
+		color: var(--letterhead-paper-muted); font-family: var(--app-font-ui); font-size: 14px; line-height: 14pt;
+		opacity: 0; transition: opacity var(--app-transition-1);
+	}
+	tbody tr:hover .remove, .remove:focus-visible { opacity: 1; }
+	.remove:hover { color: var(--letterhead-ink); }
+	/* Posé dans le blanc à gauche de « Total HT », hors du flux pour ne pas décaler la grille */
+	.add {
+		position: absolute; left: 0; top: 14pt; height: 14pt; padding: 0 1em;
+		border-radius: calc(infinity * 1px); border: 1px solid var(--letterhead-paper-line); background: none; cursor: pointer;
+		color: var(--letterhead-paper-muted); font-family: var(--app-font-ui); font-size: var(--app-text-s);
+		font-weight: 400; letter-spacing: 0; text-transform: uppercase; line-height: 1;
+	}
+	.add:hover { color: var(--letterhead-ink); }
+	tfoot tr:first-child td { padding-top: 14pt; }
+	tfoot td:first-child { text-align: right; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
+	tfoot sup { font-size: 7pt; line-height: 0; }
+
+	/* Aligné à droite sur la colonne Description, comme les libellés des totaux */
+	.place { width: 238pt; text-align: right; font-size: 10pt; margin: 0 0 14pt; }
+	/* Numéro et « Fait à » n'existent que sur une facture */
+	.sheet:not([data-kind="facture"]) .facture-only { display: none; }
+	footer { display: flex; justify-content: space-between; align-items: baseline; gap: 14pt; margin-top: auto; }
+	footer .ref { font-weight: 500; }
+
+	/* Grille de contrôle : 12 colonnes de 28 pt, gouttières de 14 pt, lignes de base tous les 14 pt. G pour l'afficher. */
+	letterhead-grid {
+		position: absolute; inset: 0; z-index: 1; pointer-events: none;
+		background: repeating-linear-gradient(to bottom, transparent 0 calc(14pt - 1px), color-mix(in srgb, var(--letterhead-paper-line) 70%, transparent) calc(14pt - 1px) 14pt);
+	}
+	letterhead-grid > div { position: absolute; inset: 0 52.64pt; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 14pt; }
+	letterhead-grid span { position: relative; background: color-mix(in srgb, var(--letterhead-paper-line) 15%, transparent); }
+	letterhead-grid span:nth-child(even) { background: color-mix(in srgb, var(--letterhead-paper-line) 6%, transparent); }
+	letterhead-grid span::after {
+		content: attr(data-index); position: absolute; inset-inline: 0; bottom: 4pt; text-align: center;
+		font-family: var(--app-font-ui); font-size: 7pt; color: var(--letterhead-paper-muted);
+	}
+
+	/* À l'impression, les marges passent de la feuille à chaque page, et le pied de page dans les boîtes de marge du bas :
+	   il se répète, calé en bas, sur chaque page. La marge du bas garde en plus la hauteur qu'il occupait dans la feuille.
+	   Les boîtes de marge n'existent que dans Chrome et Edge 131+ : ailleurs, le PDF n'a pas de pied de page. */
+	:root {
+		/* Dans une ligne de 14 pt, la base d'un texte descend de la moitié de (ascendante − descendante) × corps,
+		   0,3435 em pour Work Sans : la référence en 12 pt descend d'autant pour partager la base du site en 18 pt */
+		--letterhead-footer-shift: calc((18pt - 12pt) * .3435);
+	}
+	@media print {
+		html { background: #fff; }
+		.letterhead-page { padding: 0; overflow: visible; }
+		.letterhead-pills, .add, .remove, .hours, letterhead-grid, footer { display: none !important; }
+		.sheet { display: block; width: auto; min-height: 0; border: 0; margin: 0; padding: 0; }
+		/* Chrome répète un tfoot en bas de chaque page, comme un thead en haut : les totaux ne viennent qu'une fois, à la fin */
+		tfoot { display: table-row-group; }
+		/* L'accent de « Quantité » en capitales dépasse de sa ligne : sur une page qui reprend l'en-tête du tableau,
+		   Chrome en imprime le haut au bas de la page d'avant. 1 pt au-dessus le garde dans la cellule, la table remonte d'autant. */
+		table { margin-top: -1pt; }
+		th { padding-top: 1pt; }
+		[contenteditable]:empty::before { content: none; }
+	}
 }
 </style>
 </head>
