@@ -14,7 +14,7 @@ A long document goes on over as many pages as it needs. On each page:
 
 - The margins of the template, 98 pt at the top and the bottom and 52.64 pt on the sides, come from `@page`, not from the sheet, so a new page starts at the same height as the first.
 - The footer, `19h47.fr` on the left and the reference on the right, is printed in the margin boxes `@bottom-left` and `@bottom-right` of `@page`, at the bottom of every page, whatever the length of the content. The reference is the custom property `--letterhead-ref`, a CSS string that the script writes on `<html>` with the footer of the sheet: one value for the screen and the print.
-- The header of the table, Description, Quantité, Prix, Total, comes back at the top. A line is never split between two pages. The totals and the place come once, at the end.
+- The header of the table, Description, Quantité, Prix, Total, comes back at the top. A line is never split between two pages. The totals, the place and the mention come once, at the end.
 
 **Chrome or Edge 131 or later only.** The page-margin boxes of `@page` are not in Firefox nor Safari: there the PDF has no footer at all. On screen the sheet stays one long page, its footer at the end.
 
@@ -22,6 +22,7 @@ A long document goes on over as many pages as it needs. On each page:
 
 - **Quote or invoice** — An invoice adds its number and « Fait à ».
 - **Description** — An optional paragraph under the title, to set out the context of the document. « + Description » adds it; emptied, it gives way to the button again and is not printed.
+- **Mention** — An optional line under the date, such as the reverse charge of the VAT for a client in another country of the EU. « + Mention » adds it, and it behaves as the description. A new document empties it.
 - **Lines** — A title, an optional detail, a quantity in days and a unit price; the total of each line, the total before tax, the VAT and the total with tax, rounded to the cent. On screen only, each quantity shows its hours, at 8 hours a day.
 - **Saved as you type** — In localStorage. « + » empties the document for a new one, keeping the issuer, the VAT number, the place and the rate.
 - **Import / export** — The document as JSON, named like the PDF.

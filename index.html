@@ -98,8 +98,11 @@
 	tfoot td:first-child { text-align: right; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
 	tfoot sup { font-size: 7pt; line-height: 0; }
 
-	/* Aligné à droite sur la colonne Description, comme les libellés des totaux */
-	.place { width: 238pt; text-align: right; font-size: 10pt; margin: 0 0 14pt; }
+	/* Le lieu, la date et la mention, alignés à droite sur la colonne Description, comme les libellés des totaux */
+	.closing { position: relative; width: 238pt; text-align: right; font-size: 10pt; margin: 0 0 14pt; }
+	.closing p { margin: 0; }
+	/* Dans le blanc sous la date, aligné à droite comme elle */
+	.closing .add { left: auto; right: 0; top: 100%; }
 	/* Numéro et « Fait à » n'existent que sur une facture */
 	.sheet:not([data-kind="facture"]) .facture-only { display: none; }
 	footer { display: flex; justify-content: space-between; align-items: baseline; gap: 14pt; margin-top: auto; }
@@ -171,8 +174,8 @@
 	</div>
 	<div class="heading">
 		<h1 contenteditable="plaintext-only" data-key="title" data-ph="Titre"></h1>
-		<p class="description" id="description" contenteditable="plaintext-only" data-key="description" data-ph="Description"></p>
-		<button type="button" class="add" id="addDescription">+ Description</button>
+		<p class="description" contenteditable="plaintext-only" data-key="description" data-ph="Description"></p>
+		<button type="button" class="add" data-adds="description">+ Description</button>
 	</div>
 	<table>
 		<colgroup><col class="c-desc"><col><col><col></colgroup>
@@ -184,7 +187,11 @@
 			<tr><td>Total TTC</td><td></td><td></td><td id="ttc"></td></tr>
 		</tfoot>
 	</table>
-	<p class="place"><span class="facture-only">Fait à </span><span contenteditable="plaintext-only" data-key="place" data-ph="Lieu"></span>, le <span class="long-date"></span></p>
+	<div class="closing">
+		<p><span class="facture-only">Fait à </span><span contenteditable="plaintext-only" data-key="place" data-ph="Lieu"></span>, le <span class="long-date"></span></p>
+		<p contenteditable="plaintext-only" data-key="mention" data-ph="Mention"></p>
+		<button type="button" class="add" data-adds="mention">+ Mention</button>
+	</div>
 	<footer><span class="site">19h47.fr</span><span class="ref" id="ref"></span></footer>
 </article>
 </main>
@@ -206,6 +213,7 @@ const DEFAULT = {
 	title: '',
 	description: '',
 	place: '',
+	mention: '',
 	date: today(),
 	vat: '20',
 	lines: [emptyLine()],
@@ -285,7 +293,7 @@ function renderTotals() {
 
 function render() {
 	document.querySelectorAll('[data-key]').forEach(el => { el.textContent = state[el.dataset.key] ?? ''; });
-	toggleDescription(Boolean(state.description));
+	optionalButtons.forEach(button => toggleOptional(button, Boolean(state[button.dataset.adds])));
 	$('sheet').dataset.kind = state.kind;
 	$('kind').value = state.kind;
 	$('date').value = state.date;
@@ -322,19 +330,26 @@ $('add').addEventListener('click', () => {
 	$('lines').lastElementChild.querySelector('[data-field="label"]').focus();
 });
 
-// Facultative : vide, la description laisse place au bouton qui l'ajoute, et disparaît à l'impression
-function toggleDescription(shown) {
-	$('description').hidden = !shown;
-	$('addDescription').hidden = shown;
+// Facultatives : vides, la description et la mention laissent place au bouton qui les ajoute, et disparaissent à l'impression
+const optionalButtons = document.querySelectorAll('[data-adds]');
+const optionalField = button => document.querySelector(`[data-key="${button.dataset.adds}"]`);
+
+function toggleOptional(button, shown) {
+	optionalField(button).hidden = !shown;
+	button.hidden = shown;
 }
 
-$('addDescription').addEventListener('click', () => {
-	toggleDescription(true);
-	$('description').focus();
-});
+optionalButtons.forEach(button => {
+	const field = optionalField(button);
 
-$('description').addEventListener('blur', () => {
-	if (!state.description) toggleDescription(false);
+	button.addEventListener('click', () => {
+		toggleOptional(button, true);
+		field.focus();
+	});
+
+	field.addEventListener('blur', () => {
+		if (!state[button.dataset.adds]) toggleOptional(button, false);
+	});
 });
 
 $('date').addEventListener('input', e => {
@@ -351,7 +366,7 @@ $('kind').addEventListener('change', e => {
 $('new').addEventListener('click', () => {
 	if (!confirm('Vider le document en cours ? Exporte-le avant si tu veux le garder.')) return;
 	const title = `${KINDS[state.kind]} évolution Shopify`;
-	state = { ...state, number: '', client: '', title, description: '', date: today(), lines: [emptyLine()] };
+	state = { ...state, number: '', client: '', title, description: '', mention: '', date: today(), lines: [emptyLine()] };
 	save();
 	render();
 });
