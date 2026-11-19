@@ -65,6 +65,9 @@
 	.parties { display: grid; grid-template-columns: 210pt 1fr; margin-left: 84pt; }
 	.parties > div::first-line { font-weight: 500; }
 	h1 { max-width: 406pt; font-weight: 500; font-size: 30pt; line-height: 28pt; margin: 28pt 0 28pt 42pt; }
+	/* Sous le titre, sur sa colonne et sa largeur, comme dans le gabarit */
+	.heading { position: relative; }
+	.description { max-width: 406pt; margin: 0 0 28pt 42pt; }
 
 	table { width: 100%; table-layout: fixed; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 	col.c-desc { width: 238pt; }
@@ -81,7 +84,7 @@
 	}
 	tbody tr:hover .remove, .remove:focus-visible { opacity: 1; }
 	.remove:hover { color: var(--letterhead-ink); }
-	/* Posé dans le blanc à gauche de « Total HT », hors du flux pour ne pas décaler la grille */
+	/* Posés dans un blanc, hors du flux pour ne pas décaler la grille : à gauche de « Total HT », sous le titre */
 	.add {
 		position: absolute; left: 0; top: 14pt; height: 14pt; padding: 0 1em;
 		border-radius: calc(infinity * 1px); border: 1px solid var(--letterhead-paper-line); background: none; cursor: pointer;
@@ -89,6 +92,8 @@
 		font-weight: 400; letter-spacing: 0; text-transform: uppercase; line-height: 1;
 	}
 	.add:hover { color: var(--letterhead-ink); }
+	/* Au milieu des 28 pt sous le titre : sur la feuille en flex, sa marge reste dans .heading */
+	.heading .add { left: 42pt; top: calc(100% - 21pt); }
 	tfoot tr:first-child td { padding-top: 14pt; }
 	tfoot td:first-child { text-align: right; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
 	tfoot sup { font-size: 7pt; line-height: 0; }
@@ -164,7 +169,11 @@
 		</div>
 		<div contenteditable="plaintext-only" data-key="client" data-ph="Client"></div>
 	</div>
-	<h1 contenteditable="plaintext-only" data-key="title" data-ph="Titre"></h1>
+	<div class="heading">
+		<h1 contenteditable="plaintext-only" data-key="title" data-ph="Titre"></h1>
+		<p class="description" id="description" contenteditable="plaintext-only" data-key="description" data-ph="Description"></p>
+		<button type="button" class="add" id="addDescription">+ Description</button>
+	</div>
 	<table>
 		<colgroup><col class="c-desc"><col><col><col></colgroup>
 		<thead><tr><th>Description</th><th>Quantité</th><th>Prix</th><th>Total</th></tr></thead>
@@ -195,6 +204,7 @@ const DEFAULT = {
 	vatNumber: '',
 	client: '',
 	title: '',
+	description: '',
 	place: '',
 	date: today(),
 	vat: '20',
@@ -275,6 +285,7 @@ function renderTotals() {
 
 function render() {
 	document.querySelectorAll('[data-key]').forEach(el => { el.textContent = state[el.dataset.key] ?? ''; });
+	toggleDescription(Boolean(state.description));
 	$('sheet').dataset.kind = state.kind;
 	$('kind').value = state.kind;
 	$('date').value = state.date;
@@ -311,6 +322,21 @@ $('add').addEventListener('click', () => {
 	$('lines').lastElementChild.querySelector('[data-field="label"]').focus();
 });
 
+// Facultative : vide, la description laisse place au bouton qui l'ajoute, et disparaît à l'impression
+function toggleDescription(shown) {
+	$('description').hidden = !shown;
+	$('addDescription').hidden = shown;
+}
+
+$('addDescription').addEventListener('click', () => {
+	toggleDescription(true);
+	$('description').focus();
+});
+
+$('description').addEventListener('blur', () => {
+	if (!state.description) toggleDescription(false);
+});
+
 $('date').addEventListener('input', e => {
 	state.date = e.target.value;
 	update();
@@ -325,7 +351,7 @@ $('kind').addEventListener('change', e => {
 $('new').addEventListener('click', () => {
 	if (!confirm('Vider le document en cours ? Exporte-le avant si tu veux le garder.')) return;
 	const title = `${KINDS[state.kind]} évolution Shopify`;
-	state = { ...state, number: '', client: '', title, date: today(), lines: [emptyLine()] };
+	state = { ...state, number: '', client: '', title, description: '', date: today(), lines: [emptyLine()] };
 	save();
 	render();
 });

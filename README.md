@@ -21,6 +21,7 @@ A long document goes on over as many pages as it needs. On each page:
 ## Features
 
 - **Quote or invoice** — An invoice adds its number and « Fait à ».
+- **Description** — An optional paragraph under the title, to set out the context of the document. « + Description » adds it; emptied, it gives way to the button again and is not printed.
 - **Lines** — A title, an optional detail, a quantity in days and a unit price; the total of each line, the total before tax, the VAT and the total with tax, rounded to the cent. On screen only, each quantity shows its hours, at 8 hours a day.
 - **Saved as you type** — In localStorage. « + » empties the document for a new one, keeping the issuer, the VAT number, the place and the rate.
 - **Import / export** — The document as JSON, named like the PDF.
